@@ -26,8 +26,7 @@ int main (int argc, char* args[])
     SDL_Rect s = { 00,400, 500,10 };
     SDL_RenderFillRect(ren, &s);
     
-    //SDL_Surface* windowSurface = SDL_GetWindowSurface(win);
-    //Uint32 circleColor = SDL_MapRGB(windowSurface->format, 122, 0, 0);
+
     int circle = filledCircleColor(ren, 150, 150, 50, 0xF0FF00FF);
     SDL_RenderPresent(ren);
    
