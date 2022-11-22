@@ -1,15 +1,16 @@
 #include <SDL2/SDL.h>
 
-int AUX_WaitEventTimeoutCount(SDL_Event* evt, Uint32* ms, int delay){
-    int aux = delay;
-    int event = SDL_WaitEventTimeout(evt, delay);
-    if (event){
-    	delay -= (SDL_GetTicks() - *ms);
-    	return event;
-    }else{
-    	delay = aux;
-    	return event;
-    }
+int AUX_WaitEventTimeoutCount(SDL_Event* evt, Uint32* espera, Uint32* ms) {
+	int event = SDL_WaitEventTimeout(evt, *espera);
+	if (event){
+		*espera -= (SDL_GetTicks() - *ms);
+		if(*espera < 0) {
+			*espera = 0;
+		}
+		return event;
+	}else{
+		return event;
+	}
 }
 
 int main (int argc, char* args[])
@@ -28,45 +29,56 @@ int main (int argc, char* args[])
     SDL_bool event = SDL_TRUE;
     SDL_Event evt;
     SDL_Rect r = { 100,100, 30,30 };
+    Uint32 espera = 500;
     while(event){
         SDL_SetRenderDrawColor(ren, 0xFF,0xFF,0xFF,0x00);
         SDL_RenderClear(ren);
         SDL_SetRenderDrawColor(ren, 0x00,0x00,0xFF,0x00);
         SDL_RenderFillRect(ren, &r);
         SDL_RenderPresent(ren);
-        int delay = 500;
-        Uint32 ms = SDL_GetTicks();
-        int isevt = AUX_WaitEventTimeoutCount(&evt, &ms,delay);
+        Uint32 ms = SDL_GetTicks(); 
+        int isevt = AUX_WaitEventTimeoutCount(&evt, &espera, &ms);
+        
         if (isevt) {
-            if (evt.type == SDL_KEYDOWN) {
-                switch (evt.key.keysym.sym) {
-                    case SDLK_UP:
-                        if(r.y == 0){
+            switch (evt.type) {
+                case SDL_KEYDOWN:
+                    switch (evt.key.keysym.sym) {
+                        case SDLK_UP:
+                            if(r.y == 0){
+                                break;
+                            }
+                            r.y -= 10;
                             break;
-                        }
-                        r.y -= 10;
-                        break;
-                    case SDLK_DOWN:
-                        if(r.y == 470){
+                        case SDLK_DOWN:
+                            if(r.y == 470){
+                                break;
+                            }
+                            r.y += 10;
                             break;
-                        }
-                        r.y += 10;
-                        break;
-                    case SDLK_LEFT:
-                        if(r.x == 0){
+                        case SDLK_LEFT:
+                            if(r.x == 0){
+                                break;
+                            }
+                            r.x -= 10;
                             break;
-                        }
-                        r.x -= 10;
-                        break;
-                    case SDLK_RIGHT:
-                        if(r.x == 470){
+                        case SDLK_RIGHT:
+                            if(r.x == 470){
+                                break;
+                            }
+                            r.x += 10;
                             break;
-                        }
-                        r.x += 10;
+                    }
+                break;
+                case SDL_WINDOWEVENT:
+                    switch(evt.window.event){
+                        case SDL_WINDOWEVENT_CLOSE:
+                        event = SDL_FALSE;
                         break;
-                }
+                    }
+                break;
             }
         }else{
+            espera = 500;
             r.x += 10;
             r.y += 10;
             if(r.x >= 470){
@@ -75,20 +87,11 @@ int main (int argc, char* args[])
             if(r.y >= 470){
                 r.y = 0;
             }
-    }
-        if (evt.type == SDL_WINDOWEVENT) {
-            switch(evt.window.event){
-                case SDL_WINDOWEVENT_CLOSE:
-                event = SDL_FALSE;
-                break;
-            }
         }
-    
-
     }
-
     /* FINALIZACAO */
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
     SDL_Quit();
 }
+
