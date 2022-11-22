@@ -1,15 +1,17 @@
 #include <assert.h>
 #include <SDL2/SDL.h>
-int AUX_WaitEventTimeoutCount(SDL_Event* evt, Uint32* ms, int delay){
-    int aux = delay;
-    int event = SDL_WaitEventTimeout(evt, delay);
-    if (event){
-    	delay -= (SDL_GetTicks() - *ms);
-    	return event;
-    }else{
-    	delay = aux;
-    	return event;
-    }
+
+int AUX_WaitEventTimeoutCount(SDL_Event* evt, Uint32* espera, Uint32* ms) {
+	int event = SDL_WaitEventTimeout(evt, *espera);
+	if (event){
+		*espera -= (SDL_GetTicks() - *ms);
+		if(*espera <= 0) {
+			*espera = 0;
+		}
+		return event;
+	}else{
+		return event;
+	}
 }
 
 int main (int argc, char* args[])
@@ -24,6 +26,7 @@ int main (int argc, char* args[])
     SDL_Renderer* ren = SDL_CreateRenderer(win, -1, 0);
 
     /* EXECUÇÃO */
+    Uint32 espera = 500;
     SDL_bool event = SDL_TRUE;
     SDL_Rect Tempo = { 100,100, 50,50 };
     SDL_Rect Teclado = { 300,200, 50,50 };
@@ -47,11 +50,11 @@ int main (int argc, char* args[])
             break;
             }
         }
-        int delay = 500;
         Uint32 ms = SDL_GetTicks();
-        int isevt = AUX_WaitEventTimeoutCount(&evt, &ms,delay);
+        int isevt = AUX_WaitEventTimeoutCount(&evt, &espera,&ms);
         if (isevt) {
-            if (evt.type == SDL_KEYDOWN) {
+            switch (evt.type) {
+                case SDL_KEYDOWN:
                 switch (evt.key.keysym.sym) {
                     case SDLK_UP:
                         if(Teclado.y == 0){
@@ -77,30 +80,33 @@ int main (int argc, char* args[])
                         }
                         Teclado.x += 5;
                         break;
+                    break;
                 }
+                case SDL_MOUSEMOTION:
+                    int x,y;
+                    SDL_GetMouseState(&x,&y);
+                    if(x >= 450){
+                        Mouse.x = 450;
+                    }else{
+                        Mouse.x = x;
+                    }
+                    if(y >= 450){
+                        Mouse.y = 450;
+                    }else{
+                        Mouse.y = y;
+                    }
+                break;
             }
         } else {
+            espera = 500;
             Tempo.x += 5;
             Tempo.y += 5;
             if(Tempo.x >= 455){
-            Tempo.x = 0;
+                Tempo.x = 0;
             }
             if(Tempo.y >= 455){
                 Tempo.y = 0;
             }
-        }
-         
-        int x,y;
-        SDL_GetMouseState(&x,&y);
-        if(x >= 450){
-            Mouse.x = 450;
-        }else{
-        Mouse.x = x;
-        }
-        if(y >= 450){
-            Mouse.y = 450;
-        }else{
-        Mouse.y = y;
         }
 
     }
@@ -111,4 +117,3 @@ int main (int argc, char* args[])
     SDL_DestroyWindow(win);
     SDL_Quit();
 }
-
