@@ -1,10 +1,11 @@
 #include <assert.h>
 #include <SDL2/SDL.h>
 
-int AUX_WaitEventTimeoutCount(SDL_Event* evt, Uint32* espera, Uint32* ms) {
+int AUX_WaitEventTimeoutCount(SDL_Event* evt, Uint32* espera) {
+    Uint32 ms = SDL_GetTicks();
 	int event = SDL_WaitEventTimeout(evt, *espera);
 	if (event){
-		*espera -= (SDL_GetTicks() - *ms);
+		*espera -= (SDL_GetTicks() - ms);
 		if(*espera <= 0) {
 			*espera = 0;
 		}
@@ -50,8 +51,7 @@ int main (int argc, char* args[])
             break;
             }
         }
-        Uint32 ms = SDL_GetTicks();
-        int isevt = AUX_WaitEventTimeoutCount(&evt, &espera,&ms);
+        int isevt = AUX_WaitEventTimeoutCount(&evt, &espera);
         if (isevt) {
             switch (evt.type) {
                 case SDL_KEYDOWN:
