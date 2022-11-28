@@ -1,10 +1,10 @@
 #include <SDL2/SDL.h>
-
-int AUX_WaitEventTimeoutCount(SDL_Event* evt, Uint32* espera, Uint32* ms) {
+int AUX_WaitEventTimeoutCount(SDL_Event* evt, Uint32* espera) {
+    Uint32 ms = SDL_GetTicks();
 	int event = SDL_WaitEventTimeout(evt, *espera);
 	if (event){
-		*espera -= (SDL_GetTicks() - *ms);
-		if(*espera < 0) {
+		*espera -= (SDL_GetTicks() - ms);
+		if(*espera <= 0) {
 			*espera = 0;
 		}
 		return event;
@@ -28,16 +28,15 @@ int main (int argc, char* args[])
     /* EXECUÇÃO */
     SDL_bool event = SDL_TRUE;
     SDL_Event evt;
-    SDL_Rect r = { 100,100, 30,30 };
     Uint32 espera = 500;
+    SDL_Rect r = { 100,100, 30,30 };
     while(event){
         SDL_SetRenderDrawColor(ren, 0xFF,0xFF,0xFF,0x00);
         SDL_RenderClear(ren);
         SDL_SetRenderDrawColor(ren, 0x00,0x00,0xFF,0x00);
         SDL_RenderFillRect(ren, &r);
         SDL_RenderPresent(ren);
-        Uint32 ms = SDL_GetTicks(); 
-        int isevt = AUX_WaitEventTimeoutCount(&evt, &espera, &ms);
+        int isevt = AUX_WaitEventTimeoutCount(&evt, &espera);
         
         if (isevt) {
             switch (evt.type) {
@@ -93,5 +92,4 @@ int main (int argc, char* args[])
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
     SDL_Quit();
-}
-
+}T
