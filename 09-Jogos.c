@@ -121,7 +121,6 @@ int main (int argc, char* args[])
         }
 
         // reinicialização 
-
         ganhador = SDL_FALSE;
         colisaoMouse = SDL_FALSE;
         colisaoTeclado = SDL_FALSE;
