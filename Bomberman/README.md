@@ -1,2 +1,2 @@
-## Pasta para criação de um protótipo de Bomberman.
+* Pasta para criação de um protótipo de Bomberman.*
  
