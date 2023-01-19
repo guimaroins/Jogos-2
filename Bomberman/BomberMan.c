@@ -116,7 +116,7 @@ int ShowMenu(SDL_Surface* screen,TTF_Font* fonte){
     }
 }  
 */
-void ShowMenu2 (SDL_Renderer* ren, int * screen, int * espera) {
+void ShowInterface (SDL_Renderer* ren, int * screen, int * espera) {
 
     TTF_Init();
     TTF_Font *font = TTF_OpenFont("auxilio/tiny.ttf",50);
@@ -146,6 +146,7 @@ void ShowMenu2 (SDL_Renderer* ren, int * screen, int * espera) {
     MenuTex[2].r = (SDL_Rect) {150,150,300,200};  
     
     Uint32 antes = SDL_GetTicks();
+    
     if(*screen == morte){
 
         SDL_SetRenderDrawColor(ren, 0xFF,0xFF,0xFF,0x00);
@@ -345,30 +346,36 @@ void EventsBomberman (SDL_Event* evt, struct objetos* bomberMan,struct objetos* 
 }
 
 void EventsInimigos (int isevt,struct objetos* Inimigos,int* espera){
-    int NumeroInimigos;
     if(!isevt){
         *espera = 600;
-        for(NumeroInimigos = 0;NumeroInimigos<=2;NumeroInimigos++){
-            if(Inimigos[NumeroInimigos].r.x <= 564 && Inimigos[NumeroInimigos].r.y == 50){
-                Inimigos[NumeroInimigos].r.x += 4;
+        //Inimigo 1
+        if(Inimigos[0].r.x <= 564 && Inimigos[0].r.y == 50){
+                Inimigos[0].r.x += 4;
             }
+        if(Inimigos[0].r.y <= 238 && Inimigos[0].r.x == 564){
+            Inimigos[0].r.y += 4;
         }
-        for(NumeroInimigos = 0;NumeroInimigos<=2;NumeroInimigos++){
-            if(Inimigos[NumeroInimigos].r.y <= 238 && Inimigos[NumeroInimigos].r.x == 564){
-                Inimigos[NumeroInimigos].r.y += 4;
-            }
+        if(Inimigos[0].r.y == 238 && Inimigos[0].r.x >= 252){
+            Inimigos[0].r.x -= 4;
         }
-        for(NumeroInimigos = 0;NumeroInimigos<=2;NumeroInimigos++){
-            if(Inimigos[NumeroInimigos].r.y == 238 && Inimigos[NumeroInimigos].r.x >= 252){
-                Inimigos[NumeroInimigos].r.x -= 4;
-            }
+        if(Inimigos[0].r.y >= 50 && Inimigos[0].r.x == 252){
+            Inimigos[0].r.y -= 4;
         }
-        for(NumeroInimigos = 0;NumeroInimigos<=2;NumeroInimigos++){
-            if(Inimigos[NumeroInimigos].r.y >= 50 && Inimigos[NumeroInimigos].r.x == 252){
-                Inimigos[NumeroInimigos].r.y -= 4;
-            }
+        //Inimigo 2
+        if(Inimigos[1].r.x >= 100 && Inimigos[1].r.y == 235){
+            Inimigos[1].r.x -= 4;
         }
+        if(Inimigos[1].r.y == 235 && Inimigos[1].r.x <= 500){
+            Inimigos[1].r.x += 4;
+        }
+        //Inimigo 3
 
+        if(Inimigos[2].r.y <= 238 && Inimigos[2].r.x == 564){
+            Inimigos[2].r.y += 4;
+        }
+        if(Inimigos[2].r.y >= 50 && Inimigos[2].r.x == 252){
+            Inimigos[2].r.y -= 4;
+        }
     }
 }
 
@@ -410,7 +417,7 @@ int main (int argc, char* args[])
     // Criação dos inimigos 
     struct objetos Inimigos[3];
     Inimigos[0].r = (SDL_Rect) {400,50,17,30};
-    Inimigos[1].r = (SDL_Rect) {400,142,17,30};
+    Inimigos[1].r = (SDL_Rect) {400,235,17,30};
     Inimigos[2].r = (SDL_Rect) {100,510,17,30};
     SDL_Rect spriteInimigo = (SDL_Rect) {0,240,17,17};
     // Colisões com os blocos
@@ -424,7 +431,7 @@ int main (int argc, char* args[])
     int NumeroInimigos;
     
     // Inicializa o jogo no Menu
-    ShowMenu2(ren,&screen,&espera);
+    ShowInterface(ren,&screen,&espera);
     if(screen == fim){
         event = SDL_FALSE;
     }
@@ -455,16 +462,17 @@ int main (int argc, char* args[])
         EventsInimigos(isevt,Inimigos,&espera);
         
         //Acabando o jogo
-        if(SDL_HasIntersection(&bomberMan.r,&Inimigos[0].r)){
-            bomberMan.Sprite = (SDL_Rect) {0,64,10,10};
-            screen = morte;
-            ShowMenu2(ren,&screen,&espera);
-            int espera = 1500;
-            int isevt = AUX_WaitEventTimeoutCount(&evt, &espera);
-            if(!isevt){
-                event = SDL_FALSE;
-            }
+        for(NumeroInimigos = 0;NumeroInimigos<=2;NumeroInimigos++){
+            if(SDL_HasIntersection(&bomberMan.r,&Inimigos[NumeroInimigos].r)){
+                int espera = 1500;
+                screen = morte;
+                ShowInterface(ren,&screen,&espera);
+                int isevt = AUX_WaitEventTimeoutCount(&evt, &espera);
+                if(!isevt){
+                    event = SDL_FALSE;
+                }
 
+            }
         }
         switch(evt.type){
             case(SDL_WINDOWEVENT):
@@ -478,7 +486,7 @@ int main (int argc, char* args[])
             case(SDL_KEYDOWN):
                 switch(evt.key.keysym.sym){
                     case SDLK_ESCAPE:
-                        ShowMenu2(ren,&screen,&espera);
+                        ShowInterface(ren,&screen,&espera);
                         if(screen == fim){
                             event = SDL_FALSE;
                         }
