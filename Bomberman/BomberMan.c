@@ -22,6 +22,7 @@ int AUX_WaitEventTimeoutCount(SDL_Event* evt, int* espera) {
 struct objetos{
     SDL_Rect r;
     SDL_bool IsCollind;
+    SDL_Rect Sprite;
 };
 
 typedef struct {
@@ -31,7 +32,7 @@ typedef struct {
     SDL_Rect r;
 } screenTex;
 
-enum tela {menu=0,jogo,fim};
+enum tela {menu=0,jogo,fim,morte};
 /*
 int ShowMenu(SDL_Surface* screen,TTF_Font* fonte){
     //Inicialização
@@ -124,7 +125,7 @@ void ShowMenu2 (SDL_Renderer* ren, int * screen, int * espera) {
     SDL_Color Black = {0x00,0x00,0x00,0xFF};
     SDL_Color Grey = {125,125,125,125};
     
-    screenTex * MenuTex = malloc(sizeof(*MenuTex) * 2);
+    screenTex * MenuTex = malloc(sizeof(*MenuTex) * 3);
     
     MenuTex[0].text = malloc(sizeof("Jogar"));
     MenuTex[0].text = "Jogar";
@@ -136,10 +137,26 @@ void ShowMenu2 (SDL_Renderer* ren, int * screen, int * espera) {
     MenuTex[1].text = "Sair";
     MenuTex[1].font = font;
     MenuTex[1].color = Grey;
-    MenuTex[1].r = (SDL_Rect) {250,300,100,100};    
+    MenuTex[1].r = (SDL_Rect) {250,300,100,100};
+    
+    MenuTex[2].text = malloc(sizeof("Voce morreu"));
+    MenuTex[2].text = "Voce morreu";
+    MenuTex[2].font = font;
+    MenuTex[2].color = Grey;
+    MenuTex[2].r = (SDL_Rect) {150,150,300,200};  
     
     Uint32 antes = SDL_GetTicks();
+    if(*screen == morte){
+
+        SDL_SetRenderDrawColor(ren, 0xFF,0xFF,0xFF,0x00);
+        SDL_RenderClear(ren);   
+        struct SDL_Surface * Surface = TTF_RenderText_Solid(MenuTex[2].font,MenuTex[2].text,MenuTex[2].color);
+        struct SDL_Texture * Texture = SDL_CreateTextureFromSurface(ren,Surface);
+        SDL_RenderCopy(ren,Texture,NULL,&(MenuTex[2].r));
+        SDL_FreeSurface(Surface); 
+        SDL_DestroyTexture(Texture);
     
+    }
     while (*screen == menu){
     
         SDL_SetRenderDrawColor(ren, 0xFF,0xFF,0xFF,0x00);
@@ -147,11 +164,11 @@ void ShowMenu2 (SDL_Renderer* ren, int * screen, int * espera) {
         
         int i;
         for (i = 0; i < 2; i++){
-            struct SDL_Surface * tempSur = TTF_RenderText_Solid(MenuTex[i].font,MenuTex[i].text,MenuTex[i].color);
-            struct SDL_Texture * tempTex = SDL_CreateTextureFromSurface(ren,tempSur);
-            SDL_RenderCopy(ren,tempTex,NULL,&(MenuTex[i].r));
-            SDL_FreeSurface(tempSur); 
-            SDL_DestroyTexture(tempTex);
+            struct SDL_Surface * Surface = TTF_RenderText_Solid(MenuTex[i].font,MenuTex[i].text,MenuTex[i].color);
+            struct SDL_Texture * Texture = SDL_CreateTextureFromSurface(ren,Surface);
+            SDL_RenderCopy(ren,Texture,NULL,&(MenuTex[i].r));
+            SDL_FreeSurface(Surface); 
+            SDL_DestroyTexture(Texture);
         }
         
         SDL_RenderPresent(ren);
@@ -205,7 +222,7 @@ void ShowMenu2 (SDL_Renderer* ren, int * screen, int * espera) {
     TTF_Quit();
     
 }
-void EventsBomberman (SDL_Event* evt, struct objetos* bomberMan,struct objetos* Blocos,SDL_Rect* Bomba){
+void EventsBomberman (SDL_Event* evt, struct objetos* bomberMan,struct objetos* Blocos,SDL_Rect* Bomba, int * sprites){
     SDL_Point mousePosition;
     int NumeroBlocos;
     SDL_Rect TesteColisao = bomberMan->r;
@@ -218,6 +235,15 @@ void EventsBomberman (SDL_Event* evt, struct objetos* bomberMan,struct objetos* 
         SDL_PumpEvents();
             switch(evt->key.keysym.sym){
                 case SDLK_UP:
+                    if(*sprites == 0){
+                        bomberMan->Sprite = (SDL_Rect) {50,16,12,16};
+                    }
+                    if(*sprites == 1){
+                        bomberMan->Sprite = (SDL_Rect) {66,16,12,16};
+                    }
+                    if(*sprites == 2){
+                        bomberMan->Sprite = (SDL_Rect) {82,16,12,16};
+                    }
                     if(bomberMan->r.y <= 45){
                         break;
                     }
@@ -233,6 +259,15 @@ void EventsBomberman (SDL_Event* evt, struct objetos* bomberMan,struct objetos* 
                     }
                     break;
                 case SDLK_DOWN:
+                    if(*sprites == 0){
+                        bomberMan->Sprite = (SDL_Rect) {50,0,12,16};
+                    }
+                    if(*sprites == 1){
+                        bomberMan->Sprite = (SDL_Rect) {66,0,12,16};
+                    }
+                    if(*sprites == 2){
+                        bomberMan->Sprite = (SDL_Rect) {82,0,12,16};
+                    }
                     if(bomberMan->r.y >= 520){
                         break;
                     }
@@ -248,6 +283,15 @@ void EventsBomberman (SDL_Event* evt, struct objetos* bomberMan,struct objetos* 
                     }
                     break;
                 case SDLK_LEFT:
+                    if(*sprites == 0){
+                        bomberMan->Sprite = (SDL_Rect) {0,0,14,16};
+                    }
+                    if(*sprites == 1){
+                        bomberMan->Sprite = (SDL_Rect) {17,0,11,16};
+                    }
+                    if(*sprites == 2){
+                        bomberMan->Sprite = (SDL_Rect) {33,0,13,16};
+                    }
                     if(bomberMan->r.x == 20){
                         break;
                     }
@@ -263,6 +307,15 @@ void EventsBomberman (SDL_Event* evt, struct objetos* bomberMan,struct objetos* 
                     }
                     break;
                 case SDLK_RIGHT:
+                    if(*sprites == 0){
+                        bomberMan->Sprite = (SDL_Rect) {2,16,14,16};
+                    }
+                    if(*sprites == 1){
+                        bomberMan->Sprite = (SDL_Rect) {20,16,10,16};
+                    }
+                    if(*sprites == 2){
+                        bomberMan->Sprite = (SDL_Rect) {33,16,14,16};
+                    }
                     if(bomberMan->r.x >= 565){
                         break;
                     }
@@ -333,21 +386,22 @@ int main (int argc, char* args[])
     SDL_Renderer* ren = SDL_CreateRenderer(win, -1, 0);
     SDL_Texture* IMGSprites = IMG_LoadTexture(ren, "auxilio/NES_Bomberman_GeneralSprites.png");
     SDL_Texture* IMGbackGround = IMG_LoadTexture(ren, "auxilio/NES_Bomberman_Playfield.png");
-    assert(IMGSprites != NULL);
     assert(IMGbackGround != NULL);
 
     /* EXECUÇÃO */
     int espera = 600;
     int screen = menu;
+    int sprites = 0;
     // BackGRound
     SDL_Rect BackGround = (SDL_Rect) {0,0,600,600};
     SDL_Rect LimitacaoBackGround = (SDL_Rect) {0,0,496,208};
     
     // Criação do BomberMan
     struct objetos bomberMan;
-    bomberMan.r = (SDL_Rect) {20,50,15,30};
+    //bomberMan.r = (SDL_Rect) {20,50,15,30};
+    bomberMan.r = (SDL_Rect) {20,50,45,45};
     bomberMan.IsCollind = SDL_FALSE;
-    SDL_Rect spriteFrenteParado = (SDL_Rect) {67,0,10,16};
+    bomberMan.Sprite = (SDL_Rect) {67,0,10,16};
     
     // Criação da bomba
     SDL_Rect Bomba;
@@ -371,22 +425,47 @@ int main (int argc, char* args[])
     
     // Inicializa o jogo no Menu
     ShowMenu2(ren,&screen,&espera);
+    if(screen == fim){
+        event = SDL_FALSE;
+    }
+    //
+    SDL_SetRenderDrawColor(ren, 0xFF,0xFF,0xFF,0x00);
+    SDL_RenderClear(ren);
+    SDL_RenderCopy(ren, IMGbackGround, &LimitacaoBackGround, &BackGround);
+    SDL_RenderCopy(ren, IMGSprites, &bomberMan.Sprite, &bomberMan.r);
+    
     while (event) {
         screen = menu;
         SDL_SetRenderDrawColor(ren, 0xFF,0xFF,0xFF,0x00);
         SDL_RenderClear(ren);
         SDL_RenderCopy(ren, IMGbackGround, &LimitacaoBackGround, &BackGround);
-        SDL_RenderCopy(ren, IMGSprites, &spriteFrenteParado, &bomberMan.r);
         
         for(NumeroInimigos = 0; NumeroInimigos<=2;NumeroInimigos++){
             SDL_RenderCopy(ren, IMGSprites, &spriteInimigo, &Inimigos[NumeroInimigos].r);
         }
-
-        EventsBomberman(&evt, &bomberMan,Blocos,&Bomba);
+        if(sprites == 3){
+            sprites = 0;
+        }
+        EventsBomberman(&evt, &bomberMan,Blocos,&Bomba,&sprites);
+        sprites++;
+        SDL_RenderCopy(ren, IMGSprites, &bomberMan.Sprite, &bomberMan.r);
         SDL_RenderCopy(ren, IMGSprites, &spriteBomba, &Bomba);
         //EventsInimigos(isevt,&Inimigos);
         int isevt = AUX_WaitEventTimeoutCount(&evt, &espera);
         EventsInimigos(isevt,Inimigos,&espera);
+        
+        //Acabando o jogo
+        if(SDL_HasIntersection(&bomberMan.r,&Inimigos[0].r)){
+            bomberMan.Sprite = (SDL_Rect) {0,64,10,10};
+            screen = morte;
+            ShowMenu2(ren,&screen,&espera);
+            int espera = 1500;
+            int isevt = AUX_WaitEventTimeoutCount(&evt, &espera);
+            if(!isevt){
+                event = SDL_FALSE;
+            }
+
+        }
         switch(evt.type){
             case(SDL_WINDOWEVENT):
                 switch(evt.window.event){
@@ -413,7 +492,6 @@ int main (int argc, char* args[])
 
 
     /* FINALIZACAO */
-    SDL_DestroyTexture(IMGSprites);
     SDL_DestroyTexture(IMGbackGround);
     SDL_DestroyRenderer(ren);
     SDL_DestroyWindow(win);
